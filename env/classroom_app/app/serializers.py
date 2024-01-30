@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import *
-from django.contrib.auth import authenticate
 from django.db import transaction
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
