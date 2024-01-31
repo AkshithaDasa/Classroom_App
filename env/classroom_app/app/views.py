@@ -9,6 +9,7 @@ from rest_framework import permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.contrib.auth import logout
+from django.conf.urls import url
 
 class IsUser(permissions.BasePermission):
     def has_permission(self, request, view):
