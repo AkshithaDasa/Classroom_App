@@ -39,11 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #myapps
-    'app',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
-    'drf_yasg',
+        'apps',
+        'rest_framework',
+        'rest_framework.authtoken',
+        'django_filters',
+        'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -131,7 +131,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = "app.User"
+AUTH_USER_MODEL = "apps.User"
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 2,
-
+    'ORDERING_PARAM': 'sort',
 }
 
 

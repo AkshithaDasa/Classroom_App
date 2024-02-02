@@ -26,6 +26,8 @@ class UserManager(BaseUserManager):
         return user
         
 
+
+
 class User(AbstractUser):
     GENDER = {
         "F": "Female",
@@ -38,7 +40,7 @@ class User(AbstractUser):
     date_of_join = models.DateTimeField(auto_now_add=True)
     address = models.TextField(blank=True)
     phone_number = models.CharField(max_length=10,blank=True)
-    date_of_birth = models.DateField(blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER,blank=True)
@@ -49,13 +51,6 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    
-    def clean(self):
-        if self.phone_number and len(self.phone_number) != 10:
-            raise ValidationError("Phone number should be of 10 digits")
-
-        if self.password and len(self.password) < 8:
-            raise ValidationError("Password should be of length equal to or more than 8")
 
     def __str__(self):
         return str(self.email)
@@ -64,30 +59,10 @@ class User(AbstractUser):
         verbose_name_plural = 'Users'
 
 
-class Teacher(models.Model):
-    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
-    salary = models.IntegerField(blank=True)
-    married = models.BooleanField(default=False)
-
-    def clean(self):
-        existing_student = Student.objects.filter(user_id=self.user_id)
-        if existing_student.exists():
-             raise ValidationError("This user has already registered as student.")
-        if self.salary <= 1000:
-            raise ValidationError("Salary should be more than 1000")
-
-    def __str__(self) -> str:
-        return str(self.id)
-    
-    class Meta:
-        verbose_name_plural = 'Teachers'
-
 
 
 class Student(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE)
-    student_class = models.IntegerField(blank=False, null=False)
-    section = models.CharField(max_length=1, blank=True)
     father_name = models.CharField(max_length=100, blank=True)
     mother_name = models.CharField(max_length=100, blank=True)
 
@@ -104,17 +79,53 @@ class Student(models.Model):
 
 
 
+class Department(models.Model):
+    department_name = models.CharField(max_length=100)
+    def __str__(self) -> str:
+        return str(self.department_name)
+    
+    class Meta:
+        verbose_name_plural = 'Department'
+
+
+
 
 class Course(models.Model):
     course_name = models.CharField(max_length=100)
     course_credits = models.IntegerField()
     course_duration = models.IntegerField()  # in months
+    department_id = models.ForeignKey(Department,on_delete=models.CASCADE)
+
 
     def __str__(self) -> str:
         return str(self.course_name)
 
     class Meta:
         verbose_name_plural = 'Courses'
+
+
+
+
+class Teacher(models.Model):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
+    salary = models.IntegerField(blank=True)
+    married = models.BooleanField(default=False)
+    department_id = models.ForeignKey(Department,on_delete = models.CASCADE,default='')
+
+    def clean(self):
+        existing_student = Student.objects.filter(user_id=self.user_id)
+        if existing_student.exists():
+             raise ValidationError("This user has already registered as student.")
+        if self.salary <= 1000:
+            raise ValidationError("Salary should be more than 1000")
+
+    def __str__(self) -> str:
+        return str(self.id)
+    
+    class Meta:
+        verbose_name_plural = 'Teachers'
+
+
 
 
 class Enrolled(models.Model):
@@ -135,6 +146,8 @@ class Enrolled(models.Model):
         verbose_name_plural = 'Enrolled'
 
 
+
+
 class AllotedCourse(models.Model):
     teacher_id = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -149,3 +162,32 @@ class AllotedCourse(models.Model):
     
     class Meta:
         verbose_name_plural = 'AllotedCourse'
+
+
+
+
+class Assignment(models.Model):
+    assigned_by = models.ForeignKey(Teacher,on_delete=models.CASCADE)
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField(blank = True)
+    course = models.ForeignKey(Course,on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.id)
+    
+    class Meta:
+        verbose_name_plural = 'Assignment'
+
+
+
+class Submission(models.Model):
+    assignment_id = models.ForeignKey(Assignment,on_delete=models.CASCADE)
+    student_id = models.ForeignKey(Student,on_delete=models.CASCADE)
+    submission_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return str(self.id)
+    
+    class Meta:
+        verbose_name_plural = 'Submission'
+
